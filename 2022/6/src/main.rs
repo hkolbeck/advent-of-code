@@ -5,22 +5,14 @@ use nom::InputIter;
 
 fn main() {
     let start = Instant::now();
-    let score = solve_part_1();
+    let score = solve_n(4);
     let end = Instant::now();
     println!("Part 1: {} in {}us", score, end.duration_since(start).as_micros());
 
     let start = Instant::now();
-    let score = solve_part_2();
+    let score = solve_n(14);
     let end = Instant::now();
     println!("Part 2: {} in {}us", score, end.duration_since(start).as_micros());
-}
-
-fn solve_part_1() -> i64 {
-    solve_n(4)
-}
-
-fn solve_part_2() -> i64 {
-    solve_n(14)
 }
 
 fn solve_n(n: usize) -> i64 {
