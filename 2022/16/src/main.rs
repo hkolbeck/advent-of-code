@@ -32,7 +32,7 @@ fn solve_1(graph: HashMap<String, Vec<String>>, pressures: HashMap<String, usize
         .map(|(v, _)| v)
         .collect();
 
-    search(0, 30, &start, &has_pressure, &pressures, &distances, &HashSet::new())
+    search(0, 30, &start, &has_pressure, &pressures, &distances, &mut HashSet::new())
 }
 
 fn solve_2(graph: HashMap<String, Vec<String>>, pressures: HashMap<String, usize>) -> usize {
@@ -57,7 +57,7 @@ fn solve_2(graph: HashMap<String, Vec<String>>, pressures: HashMap<String, usize
                 &you,
                 &pressures,
                 &distances,
-                &HashSet::new()
+                &mut HashSet::new()
             );
             let ele_released = search(
                 0,
@@ -66,7 +66,7 @@ fn solve_2(graph: HashMap<String, Vec<String>>, pressures: HashMap<String, usize
                 &elephant,
                 &pressures,
                 &distances,
-                &HashSet::new()
+                &mut HashSet::new()
             );
 
             c += 1;
@@ -80,16 +80,15 @@ fn solve_2(graph: HashMap<String, Vec<String>>, pressures: HashMap<String, usize
     max
 }
 
-fn search(
+fn search<'a>(
     minute: usize,
     max_minute: usize,
-    at: &String,
-    have_pressure: &Vec<&String>,
+    at: &'a String,
+    have_pressure: &'a Vec<&String>,
     pressures: &HashMap<String, usize>,
     distances: &HashMap<(&String, &String), usize>,
-    open: &HashSet<&String>,
+    open: &mut HashSet<&'a String>,
 ) -> usize {
-    let mut open = open.clone();
     open.insert(at);
 
     let pressure = pressures.get(at).unwrap();
@@ -104,13 +103,14 @@ fn search(
                 have_pressure,
                 pressures,
                 distances,
-                &open,
+                open,
             );
 
             max = max.max(result)
         }
     }
 
+    open.remove(at);
     max + pressure * (max_minute - minute)
 }
 
