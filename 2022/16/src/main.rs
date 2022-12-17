@@ -13,10 +13,10 @@ fn main() {
         .collect();
     let (graph, pressures) = parse_input(lines);
 
-    // let start = Instant::now();
-    // let answer_1 = solve_1(graph.clone(), pressures.clone());
-    // let end = Instant::now();
-    // println!("Part 1: {} in {}us", answer_1, end.duration_since(start).as_micros());
+    let start = Instant::now();
+    let answer_1 = solve_1(graph.clone(), pressures.clone());
+    let end = Instant::now();
+    println!("Part 1: {} in {}us", answer_1, end.duration_since(start).as_micros());
 
     let start = Instant::now();
     let answer_2 = solve_2(graph, pressures);
@@ -113,42 +113,6 @@ fn search(
 
     max + pressure * (max_minute - minute)
 }
-// fn run_path(
-//     start: &String,
-//     path: &Vec<&String>,
-//     pressures: &HashMap<String, usize>,
-//     distances: &HashMap<(&String, &String), usize>,
-// ) -> (usize, String) {
-//     let mut max = 0;
-//     let mut max_path = String::from("");
-//     path.iter().permutations(path.len())
-//         .map(|mut p| {
-//             p.insert(0, &start);
-//             p
-//         })
-//         .for_each(|path| {
-//             let mut minute = 0;
-//             let mut released = 0;
-//
-//             path.windows(2).for_each(|step| {
-//                 let dist = *distances.get(&(*(step[0]), step[1])).unwrap();
-//                 let pressure = *pressures.get(*step[1]).unwrap();
-//                 if minute + dist + 1 >= 26 {
-//                     ControlFlow::<(), ()>::Break(());
-//                 } else {
-//                     released += pressure * (26 - minute - dist - 1);
-//                     minute += dist + 1;
-//                 }
-//             });
-//
-//             if released > max {
-//                 max_path = format!("{:?}", path);
-//                 max = released;
-//             }
-//         });
-//
-//     (max, max_path)
-// }
 
 fn distances(graph: &HashMap<String, Vec<String>>) -> HashMap<(&String, &String), usize> {
     let mut node_dists = HashMap::new();
