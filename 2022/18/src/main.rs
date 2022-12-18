@@ -31,13 +31,12 @@ static SIDES: [(i64, i64, i64); 6] = [
     (0, 0, -1)
 ];
 
-
 fn solve_1(input: HashSet<(i64, i64, i64)>) -> usize {
     let mut exposed_sides = 0;
     for (x, y, z) in &input {
         for (delta_x, delta_y, delta_z) in SIDES {
             if !input.contains(&(x + delta_x, y + delta_y, z + delta_z)) {
-                exposed_sides += 1
+                exposed_sides += 1;
             }
         }
     }
@@ -55,7 +54,7 @@ fn solve_2(input: HashSet<(i64, i64, i64)>) -> usize {
     for (x, y, z) in &input {
         for (delta_x, delta_y, delta_z) in SIDES {
             if is_exposed(&input, max_x, max_y, max_z, x + delta_x, y + delta_y, z + delta_z, &mut cache) {
-                exposed_sides += 1
+                exposed_sides += 1;
             }
         }
     }
@@ -71,9 +70,9 @@ fn is_exposed(
     x: i64,
     y: i64,
     z: i64,
-    cache: &mut HashMap<(i64, i64, i64), bool>
+    cache: &mut HashMap<(i64, i64, i64), bool>,
 ) -> bool {
-    return search_for_exterior(blob, max_x, max_y, max_z, x, y, z, cache, &mut HashSet::new())
+    return search_for_exterior(blob, max_x, max_y, max_z, x, y, z, cache, &mut HashSet::new());
 }
 
 fn search_for_exterior(
@@ -89,7 +88,7 @@ fn search_for_exterior(
 ) -> bool {
     let key = (x, y, z);
     if blob.contains(&key) {
-        return false
+        return false;
     } else if let Some(cached) = cache.get(&key) {
         return *cached;
     } else if visited.contains(&key) {
@@ -102,11 +101,10 @@ fn search_for_exterior(
     for (delta_x, delta_y, delta_z) in SIDES {
         if search_for_exterior(blob, max_x, max_y, max_z, x + delta_x, y + delta_y, z + delta_z, cache, visited) {
             cache.insert(key.clone(), true);
-            return true
+            return true;
         }
     }
 
-    cache.insert(key, false);
     false
 }
 
