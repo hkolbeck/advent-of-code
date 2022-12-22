@@ -1,5 +1,6 @@
 use std::collections::HashMap;
 use std::fs;
+use std::hash::Hash;
 use std::str::FromStr;
 use std::time::Instant;
 use regex::Regex;
@@ -45,39 +46,22 @@ fn solve_1(blueprints: Vec<BluePrint>) -> usize {
     blueprints.iter()
         .map(|bp| {
             let start = Instant::now();
-            let paths = make_paths(bp);
-            println!("Generated {} paths", paths.len());
-            let mut max_geodes = 0;
-            for path in paths {
-                let geodes = test_strategy(bp, &path, 24);
-                if geodes > max_geodes {
-                    println!("{}: New Max: {} - {:?}", bp.number, geodes, path);
-                }
-                max_geodes = max_geodes.max(geodes);
-            }
+            println!("{:?}", bp);
+            let (max_geodes, path) = paths(bp, 24);
+            println!("({}) {:?}", max_geodes, path);
+            // println!("Generated {} paths", paths.len());
+            // let mut max_geodes = 0;
+            // for path in paths {
+            //     let geodes = test_strategy(bp, &path, 24);
+            //     if geodes > max_geodes {
+            //         println!("{}: New Max: {} - {:?}", bp.number, geodes, path);
+            //     }
+            //     max_geodes = max_geodes.max(geodes);
+            // }
             // println!("{}: {} ({})- {:?} in {}us", bp.number, max_geodes, checked, path, Instant::now().duration_since(start).as_micros());
 
             bp.number * max_geodes
         }).sum()
-}
-
-fn make_paths(bp: &BluePrint) -> Vec<Vec<Resource>> {
-    let mut paths = vec![];
-
-    for ore in 1..*bp.maxes.get(&Ore).unwrap() {
-        for clay in 1..*bp.maxes.get(&Clay).unwrap() {
-            for obsidian in 1..*bp.maxes.get(&Obsidian).unwrap() {
-                let mut path = vec![];
-                (0..ore).for_each(|_|path.push(Ore));
-                (0..clay).for_each(|_|path.push(Clay));
-                (0..obsidian).for_each(|_|path.push(Obsidian));
-                (0..24).for_each(|_|path.push(Geodes));
-                paths.push(path);
-            }
-        }
-    }
-
-    paths
 }
 
 fn solve_2(_blueprints: Vec<BluePrint>) -> usize {
@@ -85,112 +69,116 @@ fn solve_2(_blueprints: Vec<BluePrint>) -> usize {
 }
 
 
-// fn paths(bp: &BluePrint, minutes: usize) -> (usize, Vec<Resource>) {
-//     let on_hand: HashMap<Resource, usize> = [(Ore, 0), (Clay, 0), (Obsidian, 0), (Geodes, 0)].into_iter().collect();
-//     let robots: HashMap<Resource, usize> = [(Ore, 1), (Clay, 0), (Obsidian, 0), (Geodes, 0)].into_iter().collect();
-//     let stages = vec![vec![Ore, Clay], vec![Obsidian, Clay], vec![Geodes]];
-//
-//     gen_paths(bp, on_hand, robots, &stages, 0, minutes, 1, vec![])
-// }
+fn paths(bp: &BluePrint, minutes: usize) -> (usize, Vec<Resource>) {
+    let on_hand: HashMap<Resource, usize> = [(Ore, 0), (Clay, 0), (Obsidian, 0), (Geodes, 0)].into_iter().collect();
+    let robots: HashMap<Resource, usize> = [(Ore, 1), (Clay, 0), (Obsidian, 0), (Geodes, 0)].into_iter().collect();
+    let stages = vec![vec![Ore, Clay], vec![Obsidian, Clay], vec![Geodes]];
 
-// fn gen_paths(
-//     bp: &BluePrint,
-//     on_hand: HashMap<Resource, usize>,
-//     robots: HashMap<Resource, usize>,
-//     stages: &Vec<Vec<Resource>>,
-//     stage: usize,
-//     minutes: usize,
-//     minute: usize,
-//     mut path: Vec<Resource>
-// ) -> (usize, Vec<Resource>) {
-//     if minute >= minutes {
-//         let geodes = *on_hand.get(&Geodes).unwrap();
-//         return (geodes, path);
-//     }
-//
-//     let stage_done = stages[stage].iter()
-//         .all(|r| robots.get(r).unwrap() >= bp.maxes.get(r).unwrap());
-//     if stage < 2 && stage_done {
-//         return gen_paths(
-//             bp,
-//             on_hand,
-//             robots,
-//             stages,
-//             stage + 1,
-//             minutes,
-//             minute,
-//             path,
-//         );
-//     }
-//
-//     let mut max_geodes = 0;
-//     let mut best_path = vec![];
-//     for resource in &stages[stage] {
-//         if resource != &Geodes && robots.get(resource).unwrap() >= bp.maxes.get(resource).unwrap() {
-//             continue;
-//         }
-//
-//         let mut min = minute;
-//         let mut ro = robots.clone();
-//         let mut oh = on_hand.clone();
-//
-//         while min <= minutes && !can_buy(bp, &oh, resource) {
-//             for res in &RESOURCES {
-//                 let extracted = ro.get(res).unwrap();
-//                 let has = oh.get_mut(res).unwrap();
-//                 *has += extracted;
-//             }
-//             min += 1;
-//         }
-//
-//         if min <= minutes {
-//             *ro.get_mut(resource).unwrap() += 1;
-//             for (r, cost) in bp.costs.get(resource).unwrap() {
-//                 *oh.get_mut(r).unwrap() -= cost;
-//             }
-//
-//             let can_advance = stage < stages.len() - 1 &&
-//                 stages[stage].iter().all(|r| ro.get(r).unwrap() > &0);
-//
-//             path.push(resource.clone());
-//             if can_advance {
-//                 let (geodes, path) = gen_paths(
-//                     bp,
-//                     oh.clone(),
-//                     ro.clone(),
-//                     stages,
-//                     stage + 1,
-//                     minutes,
-//                     min,
-//                     path.clone()
-//                 );
-//
-//                 if geodes > max_geodes {
-//                     max_geodes = geodes;
-//                     best_path = path;
-//                 }
-//             }
-//
-//             let (geodes, path) = gen_paths(
-//                 bp,
-//                 oh.clone(),
-//                 ro.clone(),
-//                 stages,
-//                 stage,
-//                 minutes,
-//                 min,
-//                 path.clone()
-//             );
-//
-//             if geodes > max_geodes {
-//                 max_geodes = geodes;
-//                 best_path = path;
-//             }
-//         }
-//     }
-//
-//     (max_geodes, best_path)
-// }
+    gen_paths(bp, on_hand, robots, &stages, 0, minutes, 1, vec![])
+}
+
+fn gen_paths(
+    bp: &BluePrint,
+    on_hand: HashMap<Resource, usize>,
+    robots: HashMap<Resource, usize>,
+    stages: &Vec<Vec<Resource>>,
+    stage: usize,
+    minutes: usize,
+    minute: usize,
+    mut path: Vec<Resource>
+) -> (usize, Vec<Resource>) {
+    if minute >= minutes {
+        let geodes = *on_hand.get(&Geodes).unwrap();
+        return (geodes, path);
+    }
+
+    let stage_done = stages[stage].iter()
+        .all(|r| robots.get(r).unwrap() >= bp.maxes.get(r).unwrap());
+    if stage < 2 && stage_done {
+        return gen_paths(
+            bp,
+            on_hand,
+            robots,
+            stages,
+            stage + 1,
+            minutes,
+            minute,
+            path,
+        );
+    }
+
+    let mut max_geodes = 0;
+    let mut best_path = vec![];
+    for resource in &stages[stage] {
+        if resource != &Geodes && robots.get(resource).unwrap() >= bp.maxes.get(resource).unwrap() {
+            continue;
+        }
+
+        let mut min = minute;
+        let mut ro = robots.clone();
+        let mut oh = on_hand.clone();
+
+        while min <= minutes && !can_buy(bp, &oh, resource) {
+            for res in &RESOURCES {
+                if stage == 2 && res == &Geodes {
+                    println!("Geodes: {:?} Robots: {:?}", oh.get(res), ro.get(res));
+                }
+
+                let extracted = ro.get(res).unwrap();
+                let has = oh.get_mut(res).unwrap();
+                *has += extracted;
+            }
+            min += 1;
+        }
+
+        if min <= minutes {
+            *ro.get_mut(resource).unwrap() += 1;
+            for (r, cost) in bp.costs.get(resource).unwrap() {
+                *oh.get_mut(r).unwrap() -= cost;
+            }
+
+            let can_advance = stage < stages.len() - 1 &&
+                stages[stage].iter().all(|r| ro.get(r).unwrap() > &0);
+
+            path.push(resource.clone());
+            if can_advance {
+                let (geodes, path) = gen_paths(
+                    bp,
+                    oh.clone(),
+                    ro.clone(),
+                    stages,
+                    stage + 1,
+                    minutes,
+                    min,
+                    path.clone()
+                );
+
+                if geodes > max_geodes {
+                    max_geodes = geodes;
+                    best_path = path;
+                }
+            }
+
+            let (geodes, path) = gen_paths(
+                bp,
+                oh.clone(),
+                ro.clone(),
+                stages,
+                stage,
+                minutes,
+                min,
+                path.clone()
+            );
+
+            if geodes > max_geodes {
+                max_geodes = geodes;
+                best_path = path;
+            }
+        }
+    }
+
+    (max_geodes, best_path)
+}
 
 fn test_strategy(bp: &BluePrint, build_order: &Vec<Resource>, minutes: usize) -> usize {
     let mut on_hand: HashMap<Resource, usize> = [(Ore, 0), (Clay, 0), (Obsidian, 0), (Geodes, 0)].into_iter().collect();
