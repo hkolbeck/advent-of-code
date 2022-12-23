@@ -1,4 +1,4 @@
-use std::collections::HashMap;
+use std::collections::{HashMap, HashSet};
 use std::fs;
 use std::hash::Hash;
 use std::str::FromStr;
@@ -68,6 +68,27 @@ fn solve_2(_blueprints: Vec<BluePrint>) -> usize {
     0
 }
 
+fn more_paths(bp: &BluePrint) {
+
+}
+
+fn more_paths_rec(
+    bp: &BluePrint, stages: &Vec<Vec<Resource>>, path: Vec<Resource>, stage: usize, idx: usize
+) -> Vec<Vec<Resource>> {
+    let mut can_this_turn: HashSet<Resource> = stages[stage].iter().map(|r| r.clone()).collect();;
+    for resource in &stages[stage] {
+        let so_far = path.iter().filter(|r| r == &resource).count();
+        if bp.maxes.get(resource).unwrap() <= &so_far {
+            can_this_turn.remove(resource);
+        }
+    }
+
+    if can_this_turn.is_empty() {
+        return more_paths_rec(bp, stages, path, stage + 1);
+    }
+
+    Vec::new()
+}
 
 fn paths(bp: &BluePrint, minutes: usize) -> (usize, Vec<Resource>) {
     let on_hand: HashMap<Resource, usize> = [(Ore, 0), (Clay, 0), (Obsidian, 0), (Geodes, 0)].into_iter().collect();
@@ -85,7 +106,7 @@ fn gen_paths(
     stage: usize,
     minutes: usize,
     minute: usize,
-    mut path: Vec<Resource>
+    mut path: Vec<Resource>,
 ) -> (usize, Vec<Resource>) {
     if minute >= minutes {
         let geodes = *on_hand.get(&Geodes).unwrap();
