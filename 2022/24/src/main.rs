@@ -4,7 +4,7 @@ use std::fs;
 use std::time::Instant;
 
 fn main() {
-    let raw_input = fs::read_to_string("mini-input.txt").unwrap();
+    let raw_input = fs::read_to_string("input.txt").unwrap();
     let lines: Vec<String> = raw_input.split('\n')
         .filter(|s| !s.is_empty())
         .map(String::from)
@@ -59,11 +59,11 @@ fn solve_2(board: Vec<Vec<Vec<Blizzard>>>) -> usize {
     println!("There: {}, {}", shortest_there, first_stop);
 
     let (shortest_back, second_stop) =
-        find_shortest(&graph, (first_stop, max_row, max_col), (0, 0), state_cnt);
+        find_shortest(&graph, (first_stop, max_row, max_col), (0, 0), state_cnt).unwrap();
     println!("Back: {}, {}", shortest_back, second_stop);
 
     let (shortest_there_again, _) =
-        find_shortest(&graph, (second_stop, 0, 0), (max_row, max_col), state_cnt);
+        find_shortest(&graph, (second_stop, 0, 0), (max_row, max_col), state_cnt).unwrap();
     println!("There again: {}", shortest_there_again);
 
     println!("{} -> {} -> {}", shortest_there, shortest_back, shortest_there_again);
