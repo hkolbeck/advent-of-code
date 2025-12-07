@@ -2,7 +2,6 @@ const fs = require('node:fs/promises');
 
 let sep = (r1, r2) => (r1.high < r2.low || r2.high < r1.low)
 
-
 // noinspection JSVoidFunctionReturnValueUsed
 fs.readFile("./input.txt", {encoding: "utf8"})
     .then(input => {
